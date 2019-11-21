@@ -1,28 +1,35 @@
-from flask import Flask, render_template, request, session, redirect, url_for
-from pymysql import cursors
-import pymysql
+#Import Flask Library
+from flask import Flask, render_template, request, session, url_for, redirect
+import pymysql.cursors
 
+#Initialize the app from Flask
 app = Flask(__name__)
 
-conn = pymysql.connect(host = '127.0.0.1',
-                       user = 'root',
-                       password = '',
-                       db = 'finsta',
-                       charset = 'utf8mb4',
-                       cursorclass = pymysql.cursors.DictCursor)
-app.secret_key = "key"
+#Configure MySQL
+conn = pymysql.connect(host='localhost',
+                       port = 8889,
+                       user='root',
+                       password='root',
+                       db='FlaskDemo',
+                       charset='utf8mb4',
+                       cursorclass=pymysql.cursors.DictCursor)
+
+#Define a route to hello function
 @app.route('/')
 def hello():
     return render_template('index.html')
 
-@app.route("/login")
+#Define route for login
+@app.route('/login')
 def login():
     return render_template('login.html')
 
-@app.route("/register")
+#Define route for register
+@app.route('/register')
 def register():
     return render_template('register.html')
 
+#Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     #grabs information from the forms
@@ -126,6 +133,10 @@ def show_posts():
 def logout():
     session.pop('username')
     return redirect('/')
-
+        
+app.secret_key = 'some key that you will never guess'
+#Run the app on localhost port 5000
+#debug = True -> you don't have to restart flask
+#for changes to go through, TURN OFF FOR PRODUCTION
 if __name__ == "__main__":
-    app.run
+    app.run('127.0.0.1', 5000, debug = True)
