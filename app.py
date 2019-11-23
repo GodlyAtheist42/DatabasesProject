@@ -12,7 +12,8 @@ conn = pymysql.connect(host = '127.0.0.1',
                        password = '',
                        db = 'finsta',
                        charset = 'utf8mb4',
-                       cursorclass = pymysql.cursors.DictCursor)
+                       #cursorclass = pymysql.cursors.Cursor
+                       )
 app.secret_key = "key"
 @app.route('/')
 def hello():
@@ -86,12 +87,14 @@ def registerAuth():
 def home():
     user = session['username']
     cursor = conn.cursor()
-    query = 'SELECT username, password from person'
+    query = 'SELECT filepath, caption from photo WHERE photoPoster = %s'
     #query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
     cursor.execute(query, (user))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data)
+    #print(type(data[0][0]))
+    # return "Hi"
+    return render_template('home.html', username=user, filePath=data)
 
         
 @app.route('/post', methods=['GET', 'POST'])
