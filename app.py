@@ -80,7 +80,7 @@ def registerAuth():
 @app.route('/home')
 def home():
     user = session['username']
-    cursor = conn.cursor();
+    cursor = conn.cursor()
     query = 'SELECT username, password from person'
     #query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
     cursor.execute(query, (user))
@@ -92,7 +92,7 @@ def home():
 @app.route('/post', methods=['GET', 'POST'])
 def post():
     username = session['username']
-    cursor = conn.cursor();
+    cursor = conn.cursor()
     blog = request.form['blog']
     query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
     cursor.execute(query, (blog, username))
@@ -106,7 +106,7 @@ def select_blogger():
     #username = session['username']
     #should throw exception if username not found
     
-    cursor = conn.cursor();
+    cursor = conn.cursor()
     query = 'SELECT DISTINCT username FROM blog'
     cursor.execute(query)
     data = cursor.fetchall()
@@ -116,7 +116,7 @@ def select_blogger():
 @app.route('/show_posts', methods=["GET", "POST"])
 def show_posts():
     poster = request.args['poster']
-    cursor = conn.cursor();
+    cursor = conn.cursor()
     query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
     cursor.execute(query, poster)
     data = cursor.fetchall()
