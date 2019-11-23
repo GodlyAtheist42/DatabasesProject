@@ -91,8 +91,6 @@ def home():
     cursor.execute(query, (user))
     data = cursor.fetchall()
     cursor.close()
-    #print(type(data[0][0]))
-    # return "Hi"
     return render_template('home.html', username=user, filePath=data)
 
         
