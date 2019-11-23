@@ -88,7 +88,6 @@ def home():
     user = session['username']
     cursor = conn.cursor()
     query = 'SELECT filepath, caption from photo WHERE photoPoster = %s'
-    #query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
     cursor.execute(query, (user))
     data = cursor.fetchall()
     cursor.close()
