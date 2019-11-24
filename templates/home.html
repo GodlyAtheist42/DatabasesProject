@@ -3,8 +3,13 @@
 </head>
 <body>
 <form action="/post" method="POST">
-	<h1>Welcome {{username}}</h1> 
-	<input type="text" name = "photoPath" placeholder="Address of the photo" required/>
+  <h1>Welcome {{username}}</h1> 
+  Address of the photo: 
+  <input type="text" name = "photoPath" placeholder="Address of the photo" required/> <br> <br>
+  Caption:             
+  <input type="text" name = "caption" placeholder="Why did the chicken cross the road?" required/> <br>
+  Post to all followers?
+  <input type="radio" name="allFollow" value="1"> <br>
 	<input type="submit" value = Post />
 </form>
 

@@ -61,6 +61,8 @@ def registerAuth():
     #grabs information from the forms
     username = request.form['username']
     password = request.form['password'] + SALT
+    firstName = request.form['firstName']
+    lastName = request.form['lastName']
     hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
     #cursor used to send queries
     cursor = conn.cursor()
@@ -76,8 +78,8 @@ def registerAuth():
         error = "This user already exists"
         return render_template('register.html', error = error)
     else:
-        ins = 'INSERT INTO person(username, password) VALUES(%s, %s)'
-        cursor.execute(ins, (username, hashed_password))
+        ins = 'INSERT INTO person(username, password, firstName, lastName) VALUES(%s, %s, %s, %s)'
+        cursor.execute(ins, (username, hashed_password, firstName, lastName))
         conn.commit()
         cursor.close()
         return render_template('index.html')
@@ -99,9 +101,13 @@ def post():
     username = session['username']
     cursor = conn.cursor()
     link = request.form['photoPath']
-    #query = 'MAX(photoID) FROM photo'
-    query = 'INSERT INTO photo (filePath, photoPoster, allFollowers) VALUES(%s, %s, 1)'
-    cursor.execute(query, (link, username))
+    caption = request.form['caption']
+
+    allFollowTrue = 0
+    if request.form['allFollow'] == "1":
+        allFollowTrue = 1
+    query = 'INSERT INTO photo (caption, filePath, photoPoster, allFollowers) VALUES(%s, %s, %s, %s)'
+    cursor.execute(query, (caption, link, username, allFollowTrue))
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
