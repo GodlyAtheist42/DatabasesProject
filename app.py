@@ -100,7 +100,7 @@ def post():
     cursor = conn.cursor()
     link = request.form['photoPath']
     #query = 'MAX(photoID) FROM photo'
-    query = 'INSERT INTO photo (photoID, filePath, photoPoster, allFollowers) VALUES(11, %s, %s, 1)'
+    query = 'INSERT INTO photo (photoID, filePath, photoPoster, allFollowers) VALUES(12, %s, %s, 1)'
     cursor.execute(query, (link, username))
     conn.commit()
     cursor.close()
