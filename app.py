@@ -89,8 +89,8 @@ def registerAuth():
 def home():
     user = session['username']
     cursor = conn.cursor()
-    query = 'SELECT filepath, caption, photoPoster, photoID from photo WHERE allFollowers = 1  ORDER BY postingdate DESC'
-    cursor.execute(query,)
+    query = 'SELECT filepath, caption, photoPoster, photoID from photo WHERE allFollowers = 1 OR photoPoster = %s ORDER BY postingdate DESC'
+    cursor.execute(query,user)
     data = cursor.fetchall()
     cursor.close()
     return render_template('home.html', username=user, filePath=data)
@@ -102,10 +102,7 @@ def post():
     cursor = conn.cursor()
     link = request.form['photoPath']
     caption = request.form['caption']
-
-    allFollowTrue = 0
-    if request.form['allFollow'] == "1":
-        allFollowTrue = 1
+    allFollowTrue = int(request.form['allFollow'])
     query = 'INSERT INTO photo (caption, filePath, photoPoster, allFollowers) VALUES(%s, %s, %s, %s)'
     cursor.execute(query, (caption, link, username, allFollowTrue))
     conn.commit()
