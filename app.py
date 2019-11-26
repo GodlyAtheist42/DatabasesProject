@@ -114,12 +114,24 @@ def post():
 def photoDetails():
     pid = request.args.get("id")
     cursor = conn.cursor()
-    query = 'SELECT * FROM photo WHERE photoID = %s'
+    query = 'SELECT * FROM photo JOIN person on (photo.photoPoster = person.username) WHERE photoID = %s'
     cursor.execute(query, (pid))
     data = cursor.fetchall()
     cursor.close()
     print(data)
     return render_template('photoDetails.html', details = data)
+
+@app.route('/createGroup', methods=['GET', 'POST'])
+def createGroup():
+    groupName = request.form['groupName']
+    owner = request.args.get("username")
+    cursor = conn.cursor()
+    query = 'INSERT INTO friendgroup (groupOwner, groupName) VALUES(%s, %s)'
+    cursor.execute(query, (owner, groupName))
+    query = 'INSERT INTO belongTo VALUES (%s, %s, %s)'
+    cursor.execute(query, (owner, owner, groupName))
+    cursor.close()
+    return redirect(url_for('home'))
 
 @app.route('/select_blogger')
 def select_blogger():

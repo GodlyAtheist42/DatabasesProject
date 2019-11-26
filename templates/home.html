@@ -3,7 +3,7 @@
 </head>
 <body>
 <form action="/post" method="POST">
-  <h1>Welcome {{username}}</h1> 
+  <h1>Welcome {{ username }}</h1> 
   Address of the photo: 
   <input type="text" name = "photoPath" placeholder="Address of the photo" required/> <br> <br>
   Caption:             
@@ -16,16 +16,23 @@
 	<input type="submit" value = Post />
 </form>
 
+<form action="/createGroup?username={{ username }}" method="POST">
+  <h1>Create group</h1> 
+  Name of the group: 
+  <input type="text" name = "groupName" placeholder="Name of the group" required/> <br> <br>  
+	<input type="submit" value = Create />
+</form>
+
 <br>Here are your photos:<br>
 <body>
     {% for photo in filePath %}
-       Posted by: {{photo[2]}} <br>
-       PhotoID: {{photo[3]}} <br>
+       Posted by: {{ photo[2] }} <br>
+       PhotoID: {{ photo[3] }} <br>
 
-       <a href="/photoDetails?id={{photo[3]}}">
-        <img src= "{{photo[0]}}" alt="mirror.png" width="500" height="333">
+       <a href="/photoDetails?id={{ photo[3] }}">
+        <img src= "{{ photo[0] }}" alt="photo.png" width="500" height="333">
       </a>  
-    <br> Caption: {{photo[1]}}<br><br>
+    <br> Caption: {{ photo[1] }}<br><br>
     {% endfor %}
   </body>
 
