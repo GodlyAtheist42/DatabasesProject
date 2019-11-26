@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for
+from werkzeug.debug import DebuggedApplication
 from pymysql import cursors
 import pymysql
 import hashlib
@@ -109,6 +110,17 @@ def post():
     cursor.close()
     return redirect(url_for('home'))
 
+@app.route('/photoDetails', methods=['GET', 'POST'])
+def photoDetails():
+    pid = request.args.get("id")
+    cursor = conn.cursor()
+    query = 'SELECT * FROM photo WHERE photoID = %s'
+    cursor.execute(query, (pid))
+    data = cursor.fetchall()
+    cursor.close()
+    print(data)
+    return render_template('photoDetails.html', details = data)
+
 @app.route('/select_blogger')
 def select_blogger():
     #check that user is logged in
@@ -138,4 +150,4 @@ def logout():
     return redirect('/')
 
 if __name__ == "__main__":
-    app.run
+    app.run(use_debugger=True)

@@ -21,10 +21,14 @@
     {% for photo in filePath %}
        Posted by: {{photo[2]}} <br>
        PhotoID: {{photo[3]}} <br>
-    <img src= "{{photo[0]}}" alt="mirror.png" width="500" height="333">
+
+       <a href="/photoDetails?id={{photo[3]}}">
+        <img src= "{{photo[0]}}" alt="mirror.png" width="500" height="333">
+      </a>  
     <br> Caption: {{photo[1]}}<br><br>
     {% endfor %}
   </body>
+
 
 <br>
 <a href="/logout">Logout</a>
