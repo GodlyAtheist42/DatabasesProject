@@ -14,6 +14,8 @@
   <input type="radio" name="allFollow" value="1"> <br>
   No
   <input type="radio" name="allFollow" value="0" checked> <br>
+If no, enter a comma separated list of the groups you want to post it to
+  <input type="text" name = "groupList" placeholder="List of groups"/>
 	<input type="submit" value = Post />
 </form>
 
@@ -25,6 +27,17 @@
   <input type="text" name = "description" placeholder="Description" required/> 
 	<input type="submit" value = Create />
 </form>
+
+Groups you belong to: <br>
+{% if groups %}
+{%for group in groups %}
+{{ group[0] }}<br>
+{% endfor %}
+
+{% else %}
+What a loser<br>
+
+{% endif %}
 
 <style>
     div.container {

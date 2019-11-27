@@ -96,8 +96,11 @@ def home():
     query = 'SELECT username_follower FROM follow WHERE username_followed = %s AND followStatus=0'
     cursor.execute(query,user)
     data2 = cursor.fetchall()
+    query = 'SELECT groupName FROM belongTo WHERE member_username = %s'
+    cursor.execute(query,user)
+    data3 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, photoData=data, followers = data2)
+    return render_template('home.html', username=user, photoData=data, followers = data2, groups = data3)
 
 @app.route('/followRequest', methods=['GET','POST'])
 def followRequest():
@@ -119,10 +122,27 @@ def post():
     cursor = conn.cursor()
     link = request.form['photoPath']
     caption = request.form['caption']
+    groups = request.form['groupList']
     allFollowTrue = int(request.form['allFollow'])
     query = 'INSERT INTO photo (caption, filePath, photoPoster, allFollowers) VALUES(%s, %s, %s, %s)'
     cursor.execute(query, (caption, link, username, allFollowTrue))
     conn.commit()
+
+    if not allFollowTrue:
+        query = 'SELECT max(photoID) FROM photo'
+        cursor.execute(query)
+        pid = cursor.fetchone()
+        groupList = groups.split(',')
+        for group in groupList:
+            query = 'SELECT owner_username FROM belongTo where member_username = %s AND groupName = %s'
+            cursor.execute(query, (username, group))
+            owner = cursor.fetchone()
+            query = 'INSERT INTO sharedwith VALUES(%s, %s, %s)'
+            cursor.execute(query, (owner, group, pid))
+            conn.commit()
+    cursor.close()
+
+
     cursor.close()
     return redirect(url_for('home'))
 
@@ -134,7 +154,6 @@ def photoDetails():
     cursor.execute(query, (pid))
     data = cursor.fetchone()
     cursor.close()
-    print(data)
     return render_template('photoDetails.html', details = data)
 
 @app.route('/createGroup', methods=['GET', 'POST'])
