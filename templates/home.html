@@ -4,6 +4,7 @@
 <body>
 <form action="/post" method="POST">
   <h1>Welcome {{ username }}</h1> 
+  Waanna post a photo? <br> <br>
   Address of the photo: 
   <input type="text" name = "photoPath" placeholder="Address of the photo" required/> <br> <br>
   Caption:             
@@ -16,25 +17,73 @@
 	<input type="submit" value = Post />
 </form>
 
-<form action="/createGroup?username={{ username }}" method="POST">
-  <h1>Create group</h1> 
+<form action="/createGroup" method="POST">
+ Create group <br><br>
   Name of the group: 
-  <input type="text" name = "groupName" placeholder="Name of the group" required/> <br> <br>  
+  <input type="text" name = "groupName" placeholder="Name of the group" required/>
+  <br> Description:
+  <input type="text" name = "description" placeholder="Description" required/> 
 	<input type="submit" value = Create />
 </form>
 
+<style>
+    div.container {
+      display:inline-block;
+    }
+</style>
+
+Follow Requests:<br>
+{% if followers %}
+
+{% for follower in followers %}
+{{ follower[0] }}
+
+<!-- <div class="container"> -->
+
+    <form action="/followRequest?follower={{ follower[0] }}&fs=1" method="POST"> 
+    <input type="submit" value = "Accept"/> </form>
+
+    <form action="/followRequest?follower={{ follower[0] }}&fs=0" method="POST"> 
+    <input type="submit" value = "Deny" /> </form>
+<!-- </div> -->
+<br>
+{% endfor %}
+
+{% else %}
+No one likes you
+
+{%endif %}
+
+<form action="/follow?" method="POST"> 
+  Username of person you want to follow: 
+  <input type="text" name = "followed" placeholder="Username" required/>  
+	<input type="submit" value = Follow />
+</form>
+
 <br>Here are your photos:<br>
-<body>
-    {% for photo in filePath %}
+    <meta charset=utf-8 />
+    <style>
+      div.container {
+        display:inline-block;
+      }
+  
+      p {
+        text-align:center;
+      }
+    </style>
+  </head>
+
+    {% for photo in photoData %}
+    <div class="container">
        Posted by: {{ photo[2] }} <br>
        PhotoID: {{ photo[3] }} <br>
 
        <a href="/photoDetails?id={{ photo[3] }}">
-        <img src= "{{ photo[0] }}" alt="photo.png" width="500" height="333">
-      </a>  
-    <br> Caption: {{ photo[1] }}<br><br>
+        <img src= "{{ photo[0] }}" alt="photo.png" width="450" height="333">
+        <form action="/like?username={{ username }}" method="POST"></form></a>  
+    Caption: {{ photo[1] }}<br><br>
+    </div>
     {% endfor %}
-  </body>
 
 
 <br>

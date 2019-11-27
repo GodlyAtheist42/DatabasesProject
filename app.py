@@ -93,9 +93,25 @@ def home():
     query = 'SELECT filepath, caption, photoPoster, photoID from photo WHERE allFollowers = 1 OR photoPoster = %s ORDER BY postingdate DESC'
     cursor.execute(query,user)
     data = cursor.fetchall()
+    query = 'SELECT username_follower FROM follow WHERE username_followed = %s AND followStatus=0'
+    cursor.execute(query,user)
+    data2 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, filePath=data)
+    return render_template('home.html', username=user, photoData=data, followers = data2)
 
+@app.route('/followRequest', methods=['GET','POST'])
+def followRequest():
+    followed = session['username']
+    follower = request.args.get("follower")
+    followStatus = int(request.args.get("fs"))
+    cursor = conn.cursor()
+    query = 'DELETE FROM follow WHERE username_followed = %s AND username_follower = %s'
+    cursor.execute(query, (followed, follower))
+    if followStatus:
+        query = 'INSERT INTO follow VALUES(%s, %s, 1)'
+        cursor.execute(query, (followed, follower))
+    cursor.close()
+    return redirect(url_for('home'))
         
 @app.route('/post', methods=['GET', 'POST'])
 def post():
@@ -116,7 +132,7 @@ def photoDetails():
     cursor = conn.cursor()
     query = 'SELECT * FROM photo JOIN person on (photo.photoPoster = person.username) WHERE photoID = %s'
     cursor.execute(query, (pid))
-    data = cursor.fetchall()
+    data = cursor.fetchone()
     cursor.close()
     print(data)
     return render_template('photoDetails.html', details = data)
@@ -124,37 +140,25 @@ def photoDetails():
 @app.route('/createGroup', methods=['GET', 'POST'])
 def createGroup():
     groupName = request.form['groupName']
-    owner = request.args.get("username")
+    owner = session['username']
+    description = request.form['description']
     cursor = conn.cursor()
-    query = 'INSERT INTO friendgroup (groupOwner, groupName) VALUES(%s, %s)'
-    cursor.execute(query, (owner, groupName))
+    query = 'INSERT INTO friendgroup (groupOwner, groupName, description) VALUES(%s, %s, %s)'
+    cursor.execute(query, (owner, groupName, description))
     query = 'INSERT INTO belongTo VALUES (%s, %s, %s)'
     cursor.execute(query, (owner, owner, groupName))
     cursor.close()
     return redirect(url_for('home'))
 
-@app.route('/select_blogger')
-def select_blogger():
-    #check that user is logged in
-    #username = session['username']
-    #should throw exception if username not found
-    
+@app.route('/follow', methods=['GET', 'POST'])
+def follow():
+    followed = request.form['followed']
+    follower = session['username']
     cursor = conn.cursor()
-    query = 'SELECT DISTINCT username FROM blog'
-    cursor.execute(query)
-    data = cursor.fetchall()
+    query = 'INSERT INTO follow (username_followed, username_follower, followstatus) VALUES (%s, %s, 0)'
+    cursor.execute(query, (followed, follower))
     cursor.close()
-    return render_template('select_blogger.html', user_list=data)
-
-@app.route('/show_posts', methods=["GET", "POST"])
-def show_posts():
-    poster = request.args['poster']
-    cursor = conn.cursor()
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, poster)
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template('show_posts.html', poster_name=poster, posts=data)
+    return redirect(url_for('home'))
 
 @app.route('/logout')
 def logout():
