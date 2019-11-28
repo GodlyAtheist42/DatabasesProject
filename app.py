@@ -113,6 +113,7 @@ def followRequest():
     if followStatus:
         query = 'INSERT INTO follow VALUES(%s, %s, 1)'
         cursor.execute(query, (followed, follower))
+    conn.commit()
     cursor.close()
     return redirect(url_for('home'))
         
@@ -124,14 +125,19 @@ def post():
     caption = request.form['caption']
     groups = request.form['groupList']
     allFollowTrue = int(request.form['allFollow'])
-    query = 'INSERT INTO photo (caption, filePath, photoPoster, allFollowers) VALUES(%s, %s, %s, %s)'
-    cursor.execute(query, (caption, link, username, allFollowTrue))
+    query = 'SELECT max(photoID) FROM photo'
+    cursor.execute(query,)
+    pid = cursor.fetchone()
+    
+    if not pid:
+        pid = (0)
+    pid = pid[0] + 1
+
+    query = 'INSERT INTO photo (photoID, caption, filePath, photoPoster, allFollowers) VALUES(%s, %s, %s, %s, %s)'
+    cursor.execute(query, (pid, caption, link, username, allFollowTrue))
     conn.commit()
 
     if not allFollowTrue:
-        query = 'SELECT max(photoID) FROM photo'
-        cursor.execute(query)
-        pid = cursor.fetchone()
         groupList = groups.split(',')
         for group in groupList:
             query = 'SELECT owner_username FROM belongTo where member_username = %s AND groupName = %s'
@@ -164,8 +170,10 @@ def createGroup():
     cursor = conn.cursor()
     query = 'INSERT INTO friendgroup (groupOwner, groupName, description) VALUES(%s, %s, %s)'
     cursor.execute(query, (owner, groupName, description))
+    conn.commit()
     query = 'INSERT INTO belongTo VALUES (%s, %s, %s)'
     cursor.execute(query, (owner, owner, groupName))
+    conn.commit()
     cursor.close()
     return redirect(url_for('home'))
 
@@ -176,6 +184,7 @@ def follow():
     cursor = conn.cursor()
     query = 'INSERT INTO follow (username_followed, username_follower, followstatus) VALUES (%s, %s, 0)'
     cursor.execute(query, (followed, follower))
+    conn.commit()
     cursor.close()
     return redirect(url_for('home'))
 
