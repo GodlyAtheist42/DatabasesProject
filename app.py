@@ -13,7 +13,6 @@ conn = pymysql.connect(host = '127.0.0.1',
                        password = '',
                        db = 'finsta',
                        charset = 'utf8mb4',
-                       #cursorclass = pymysql.cursors.Cursor
                        )
 app.secret_key = "key"
 @app.route('/')
@@ -90,8 +89,22 @@ def registerAuth():
 def home():
     user = session['username']
     cursor = conn.cursor()
-    query = 'SELECT filepath, caption, photoPoster, photoID from photo WHERE allFollowers = 1 OR photoPoster = %s ORDER BY postingdate DESC'
-    cursor.execute(query,user)
+    #query = 'SELECT filepath, caption, photoPoster, photoID from photo WHERE allFollowers = 1 OR photoPoster = %s ORDER BY postingdate DESC'
+    #cursor.execute(query,user)
+    query = 'SELECT filepath, caption, photoPoster, photoID \
+             FROM photo \
+             WHERE (allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
+             OR \
+             (allFollowers = 0 AND photoPoster IN (SELECT member_username \
+                FROM BelongTo as b \
+                WHERE member_username = %s AND \
+                photoID in (SELECT PhotoId \
+				    FROM SharedWith \
+					WHERE (groupName, owner_username) IN (SELECT groupName, owner_username\
+                    FROM BelongTo \
+					WHERE member_username = b.member_username))))'
+
+    cursor.execute(query,(user, user))
     data = cursor.fetchall()
     query = 'SELECT username_follower FROM follow WHERE username_followed = %s AND followStatus=0'
     cursor.execute(query,user)
@@ -128,7 +141,7 @@ def post():
     query = 'SELECT max(photoID) FROM photo'
     cursor.execute(query,)
     pid = cursor.fetchone()
-    
+
     if not pid:
         pid = (0)
     pid = pid[0] + 1

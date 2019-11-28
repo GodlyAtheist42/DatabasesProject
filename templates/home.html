@@ -4,9 +4,9 @@
 <body>
 <form action="/post" method="POST">
   <h1>Welcome {{ username }}</h1> 
-  Waanna post a photo? <br> <br>
+  Waanna post a photo? <br>
   Address of the photo: 
-  <input type="text" name = "photoPath" placeholder="Address of the photo" required/> <br> <br>
+  <input type="text" name = "photoPath" placeholder="Address of the photo" required/> <br>
   Caption:             
   <input type="text" name = "caption" placeholder="Why did the chicken cross the road?" required/> <br>
   Post to all followers? <br>
@@ -14,17 +14,17 @@
   <input type="radio" name="allFollow" value="1"> <br>
   No
   <input type="radio" name="allFollow" value="0" checked> <br>
-If no, enter a comma separated list of the groups you want to post it to
-  <input type="text" name = "groupList" placeholder="List of groups"/>
+If no, enter a comma separated list of the groups you want to post it to:
+  <input type="text" name = "groupList" placeholder="List of groups"/><br>
 	<input type="submit" value = Post />
 </form>
 
 <form action="/createGroup" method="POST">
- Create group <br><br>
+ Create group <br>
   Name of the group: 
-  <input type="text" name = "groupName" placeholder="Name of the group" required/>
-  <br> Description:
-  <input type="text" name = "description" placeholder="Description" required/> 
+  <input type="text" name = "groupName" placeholder="Name of the group" required/><br> 
+  Description:      
+  <input type="text" name = "description" placeholder="Description" required/><br>
 	<input type="submit" value = Create />
 </form>
 
@@ -33,9 +33,10 @@ Groups you belong to: <br>
 {%for group in groups %}
 {{ group[0] }}<br>
 {% endfor %}
+<br>
 
 {% else %}
-What a loser<br>
+You have none. What a loser<br><br>
 
 {% endif %}
 
@@ -63,7 +64,7 @@ Follow Requests:<br>
 {% endfor %}
 
 {% else %}
-No one likes you
+No one likes you <br><br>
 
 {%endif %}
 

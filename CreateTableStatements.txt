@@ -21,7 +21,7 @@ CREATE TABLE Friendgroup(
 
 CREATE TABLE Photo (
     photoID int AUTO_INCREMENT, 
-    postingdate DATETIME,
+    postingdate DATETIME DEFAULT CURRENT_TIMESTAMP,
     filepath VARCHAR(100),
     allFollowers Boolean,
     caption VARCHAR(100),
