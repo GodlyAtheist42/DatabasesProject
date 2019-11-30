@@ -1,3 +1,6 @@
 __pycache__/
 DB.code-workspace
 .vscode/
+.DS_Store
+.idea/
+venv/

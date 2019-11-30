@@ -115,7 +115,7 @@ You have none. What a loser<br><br>
     Caption: {{ photo[1] }}<br><br>
     <form action="/tag?id={{photo[3]}}" method="POST">
       Tag:
-      <input type="text" name = "toTag" placeholder="Person to be tagged" required/>  
+      <input type="text" name = "toTag" placeholder="Person to be tagged" required/>
       <input type="submit" value = Tag />
       {% with message = get_flashed_messages() %}
       {% if message %}
@@ -123,6 +123,18 @@ You have none. What a loser<br><br>
       {% endif %}
       {% endwith %}
     </form>
+
+    <form action="/like?id={{photo[3]}}" method="POST">
+      Like:
+      <input type="text" name = "likeVal" placeholder="Rating out of 10" required/>
+      <input type="submit" value = Like />
+      {% with message = get_flashed_messages() %}
+      {% if message %}
+        {{ message[0] }}
+      {% endif %}
+      {% endwith %}
+    </form>
+
     </div>
     {% endfor %}
 
