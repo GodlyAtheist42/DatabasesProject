@@ -10,7 +10,8 @@ app = Flask(__name__)
 
 conn = pymysql.connect(host = '127.0.0.1',
                        user = 'root',
-                       password = '',
+                       port = 8889,
+                       password = 'root',
                        db = 'finsta',
                        charset = 'utf8mb4',
                        )
@@ -258,17 +259,24 @@ def search():
     user = session['username']
     cursor = conn.cursor()
     pid = request.form['searchUser']
-    query = 'SELECT filepath, caption, photoPoster, photoID \
-             FROM photo \
-             WHERE (photoPoster = %s) AND ((allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
-             OR \
-             (      photoID in (SELECT PhotoId \
-				    FROM SharedWith \
-					WHERE (groupName,groupOwner ) IN (SELECT groupName,owner_username \
-                                                          FROM BelongTo \
-					                                      WHERE member_username = %s)\
-			)))'
-    cursor.execute(query, (pid, user, user))
+    if user != pid:
+        query = 'SELECT filepath, caption, photoPoster, photoID \
+                 FROM photo \
+                 WHERE (photoPoster = %s) AND ((allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
+                 OR \
+                 (      photoID in (SELECT PhotoId \
+                        FROM SharedWith \
+                        WHERE (groupName,groupOwner ) IN (SELECT groupName,owner_username \
+                                                              FROM BelongTo \
+                                                              WHERE member_username = %s)\
+                )))'
+        cursor.execute(query, (pid, user, user))
+    else:
+        query = 'SELECT filepath, caption, photoPoster, photoID \
+                 FROM photo\
+                 WHERE photoPoster = %s'
+        cursor.execute(query, (user))
+
     data = cursor.fetchall()
     cursor.close()
     return render_template('searchresults.html', photoData=data)
