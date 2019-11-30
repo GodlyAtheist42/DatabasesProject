@@ -10,8 +10,7 @@ app = Flask(__name__)
 
 conn = pymysql.connect(host = '127.0.0.1',
                        user = 'root',
-                       port = 8889,
-                       password = 'root',
+                       password = '',
                        db = 'finsta',
                        charset = 'utf8mb4',
                        )
@@ -251,6 +250,7 @@ def tagRequest():
         query = 'INSERT INTO tagged VALUES(%s, %s, 1)'
         cursor.execute(query, (user, pid))
         conn.commit()
+        cursor.close()
     return redirect(url_for('home'))
 
 @app.route('/search', methods=['GET', 'POST'])
