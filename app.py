@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, flash
 from werkzeug.debug import DebuggedApplication
 from pymysql import cursors
 import pymysql
@@ -89,9 +89,7 @@ def registerAuth():
 def home():
     user = session['username']
     cursor = conn.cursor()
-    #query = 'SELECT filepath, caption, photoPoster, photoID from photo WHERE allFollowers = 1 OR photoPoster = %s ORDER BY postingdate DESC'
-    #cursor.execute(query,user)
-    query = query = 'SELECT filepath, caption, photoPoster, photoID \
+    query = 'SELECT filepath, caption, photoPoster, photoID \
              FROM photo \
              WHERE (allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
              OR \
@@ -110,8 +108,11 @@ def home():
     query = 'SELECT groupName FROM belongTo WHERE member_username = %s'
     cursor.execute(query,user)
     data3 = cursor.fetchall()
+    query = 'SELECT photoID from tagged WHERE username = %s AND tagStatus = 0'
+    cursor.execute(query, user)
+    data4 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, photoData=data, followers = data2, groups = data3)
+    return render_template('home.html', username=user, photoData=data, followers = data2, groups = data3, tagRequests = data4)
 
 @app.route('/followRequest', methods=['GET','POST'])
 def followRequest():
@@ -170,8 +171,11 @@ def photoDetails():
     query = 'SELECT * FROM photo JOIN person on (photo.photoPoster = person.username) WHERE photoID = %s'
     cursor.execute(query, (pid))
     data = cursor.fetchone()
+    query = 'SELECT firstName, lastName FROM tagged NATURAL JOIN person WHERE photoID = %s'
+    cursor.execute(query, (pid))
+    data2 = cursor.fetchall()
     cursor.close()
-    return render_template('photoDetails.html', details = data)
+    return render_template('photoDetails.html', details = data, taggedList = data2)
 
 @app.route('/createGroup', methods=['GET', 'POST'])
 def createGroup():
@@ -197,6 +201,55 @@ def follow():
     cursor.execute(query, (followed, follower))
     conn.commit()
     cursor.close()
+    return redirect(url_for('home'))
+
+@app.route('/tag', methods=['GET', 'POST'])
+def tag():
+    user = session['username']
+    cursor = conn.cursor()
+    toTag = request.form['toTag']
+    pid = request.args.get('id')
+    if toTag == user:
+        query = 'INSERT INTO tagged VALUES(%s, %s, 1)'
+        cursor.execute(query, (toTag, pid))
+        conn.commit()
+    else:
+        query = 'SELECT photoID \
+             FROM photo \
+             WHERE photoID = %s AND ((allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
+             OR \
+             (      photoID in (SELECT PhotoId \
+				    FROM SharedWith \
+					WHERE (groupName,groupOwner ) IN (SELECT groupName,owner_username \
+                                                          FROM BelongTo \
+					                                      WHERE member_username = %s)\
+			)))'
+        cursor.execute(query, (pid, toTag, toTag))
+        data = cursor.fetchone()
+        if data:
+            query = 'INSERT INTO tagged VALUES(%s, %s, 0)'
+            cursor.execute(query, (toTag, pid))
+            conn.commit()
+        else:
+            flash("The tagged person can't see the photo.")
+            return redirect(url_for('home'))
+        cursor.close()
+
+    return redirect(url_for('home'))
+
+@app.route('/tagRequest', methods=['GET', 'POST'])
+def tagRequest():
+    user = session['username']
+    cursor = conn.cursor()
+    ts = request.args.get('ts')
+    pid = request.args.get('pid')
+    query = 'DELETE FROM tagged WHERE username = %s AND photoID = %s'
+    cursor.execute(query, (user, pid))
+    conn.commit()
+    if int(ts):
+        query = 'INSERT INTO tagged VALUES(%s, %s, 1)'
+        cursor.execute(query, (user, pid))
+        conn.commit()
     return redirect(url_for('home'))
 
 @app.route('/logout')

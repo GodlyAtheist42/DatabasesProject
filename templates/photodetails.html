@@ -5,7 +5,15 @@
 <p> Details:</p>
 <img src= "{{ details[2] }}" alt="photo.png" width="500" height="333"> <br>
 Full name: {{ details[8] }} {{ details[9] }} <br>
-Posted on: {{ details[1] }}
+Posted on: {{ details[1] }}<br>
+
+{% if taggedList %}
+Tags:<br>
+{% for person in taggedList %}
+{{ person[0] }} {{ person[1] }} <br>
+{% endfor %}
+{% endif %}
+
 <br>
 <a href="/home">Back</a>
 </body>

@@ -30,7 +30,7 @@ If no, enter a comma separated list of the groups you want to post it to:
 
 Groups you belong to: <br>
 {% if groups %}
-{%for group in groups %}
+{% for group in groups %}
 {{ group[0] }}<br>
 {% endfor %}
 <br>
@@ -68,6 +68,23 @@ No one likes you <br><br>
 
 {%endif %}
 
+Your tag requests: <br>
+{% if tagRequests %}
+{%for request in tagRequests %}
+PhotoID: {{ request[0] }}<br>
+<form action="/tagRequest?pid={{ request[0] }}&ts=1" method="POST"> 
+  <input type="submit" value = "Accept"/> </form>
+
+  <form action="/tagRequest?pid={{ request[0] }}&ts=0" method="POST"> 
+  <input type="submit" value = "Deny" /> </form>
+{% endfor %}
+<br>
+
+{% else %}
+You have none. What a loser<br><br>
+
+{% endif %}
+
 <form action="/follow?" method="POST"> 
   Username of person you want to follow: 
   <input type="text" name = "followed" placeholder="Username" required/>  
@@ -92,10 +109,20 @@ No one likes you <br><br>
        Posted by: {{ photo[2] }} <br>
        PhotoID: {{ photo[3] }} <br>
 
-       <a href="/photoDetails?id={{ photo[3] }}">
+       <a href="/photoDetails?id={{photo[3]}}">
         <img src= "{{ photo[0] }}" alt="photo.png" width="450" height="333">
         <form action="/like?username={{ username }}" method="POST"></form></a>  
     Caption: {{ photo[1] }}<br><br>
+    <form action="/tag?id={{photo[3]}}" method="POST">
+      Tag:
+      <input type="text" name = "toTag" placeholder="Person to be tagged" required/>  
+      <input type="submit" value = Tag />
+      {% with message = get_flashed_messages() %}
+      {% if message %}
+        {{ message[0] }}
+      {% endif %}
+      {% endwith %}
+    </form>
     </div>
     {% endfor %}
 
