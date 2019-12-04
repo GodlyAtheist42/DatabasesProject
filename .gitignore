@@ -1,4 +1,9 @@
 __pycache__/
 DB.code-workspace
 .vscode/
+<<<<<<< HEAD
+=======
+.DS_Store
+.idea/
+>>>>>>> add6cfde7f559f4582ffe355d849221e053aa078
 venv/
