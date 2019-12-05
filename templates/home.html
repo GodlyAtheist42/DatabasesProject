@@ -4,7 +4,7 @@
 <body>
 <form action="/post" method="POST">
   <h1>Welcome {{ username }}</h1> 
-  Waanna post a photo? <br>
+  Wanna post a photo? <br>
   Address of the photo: 
   <input type="text" name = "photoPath" placeholder="Address of the photo" required/> <br>
   Caption:             
@@ -85,10 +85,17 @@ You have none. What a loser<br><br>
 
 {% endif %}
 
-<form action="/follow?" method="POST"> 
+<form action="/follow" method="POST"> 
   Username of person you want to follow: 
   <input type="text" name = "followed" placeholder="Username" required/>  
 	<input type="submit" value = Follow />
+</form>
+
+<form action="/search" method="POST">
+    Search for User:
+    <input type="text" name="searchUser" placeholder="Username" required/>
+        <input type="submit" value = Search />
+
 </form>
 
 <br>Here are your photos:<br>
