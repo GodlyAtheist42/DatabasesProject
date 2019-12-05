@@ -28,6 +28,20 @@ If no, enter a comma separated list of the groups you want to post it to:
 	<input type="submit" value = Create />
 </form>
 
+<form action="/addUserToGroup" method="POST">
+    Add friends to a group you own <br>
+    Group:
+    <input type="text" name = "groupName" placeholder="Group" required/><br>
+    User that follows you:
+    <input type="text" name = "user" placeholder="User" required/><br>
+    <input type="submit" value = Submit />
+    {% with message = get_flashed_messages() %}
+      {% if message %}
+        {{ message[0] }}
+      {% endif %}
+      {% endwith %}
+</form>
+
 Groups you belong to: <br>
 {% if groups %}
 {% for group in groups %}
