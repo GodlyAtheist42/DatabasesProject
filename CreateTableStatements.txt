@@ -36,7 +36,7 @@ CREATE TABLE Photo (
 CREATE TABLE Likes (
     username VARCHAR(20), 
     photoID int, 
-    liketime DATETIME, 
+    liketime DATETIME DEFAULT CURRENT_TIMESTAMP,
     rating int,
     PRIMARY KEY(username, photoID), 
     FOREIGN KEY(username) REFERENCES Person(username),

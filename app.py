@@ -11,7 +11,11 @@ app = Flask(__name__)
 # COMMENTS/NOTES
 # default time stamp for datetime vals
 
+<<<<<<< HEAD
 dev = ' '
+=======
+dev = 'n'
+>>>>>>> part4_add
 
 if dev == "nc":
     conn = pymysql.connect(host='127.0.0.1',
@@ -316,6 +320,32 @@ def search():
     cursor.close()
     return render_template('searchresults.html', photoData=data)
 
+@app.route('/addUserToGroup', methods = ['GET', 'POST'])
+def addUserToGroup():
+    user = session['username']
+    cursor = conn.cursor()
+    group = request.form['groupName']
+    pid = request.form['user']
+    query = '''SELECT username_followed
+            FROM Follow
+            WHERE username_follower = %s AND followstatus = 1 AND username_followed = %s '''
+    cursor.execute(query, (user, pid ))
+    if cursor.fetchone():
+        query = '''SELECT member_username
+                        FROM BelongTo
+                        WHERE owner_username = %s AND groupName = %s AND member_username = %s '''
+        cursor.execute(query,(user, group, pid))
+        if not cursor.fetchone():
+            query = '''INSERT INTO BelongTo(member_username, owner_username, groupName) VALUES(%s, %s, %s)'''
+            cursor.execute(query, (pid, user, group))
+            conn.commit()
+        else:
+            flash("User already in your group: "+ group + " or group doesnt exist")
+
+    else:
+        flash("User doesnt follow you ")
+    cursor.close()
+    return redirect(url_for('home'))
 
 @app.route('/logout')
 def logout():
