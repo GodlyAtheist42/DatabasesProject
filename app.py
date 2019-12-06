@@ -11,7 +11,7 @@ app = Flask(__name__)
 # COMMENTS/NOTES
 # default time stamp for datetime vals
 
-dev = 'nc'
+dev = 'n'
 
 if dev == "nc":
     conn = pymysql.connect(host='127.0.0.1',
