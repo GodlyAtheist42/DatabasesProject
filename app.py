@@ -8,20 +8,28 @@ SALT = 'cs3083'
 
 app = Flask(__name__)
 
-# conn = pymysql.connect(host = '127.0.0.1',
-#                        user = 'root',
-#                        port = 8889,
-#                        password = 'root',
-#                        db = 'finsta',
-#                        charset = 'utf8mb4',
-#                        )
+# COMMENTS/NOTES
+# default time stamp for datetime vals
 
-conn = pymysql.connect(host = '127.0.0.1',
-                       user = 'root',
-                       password = '',
-                       db = 'finsta',
-                       charset = 'utf8mb4',
-                       )
+dev = ' '
+
+if dev == "nc":
+    conn = pymysql.connect(host='127.0.0.1',
+                           port=8889,
+                           user='root',
+                           password='root',
+                           db='finsta',
+                           charset='utf8mb4',
+                           )
+
+else:
+    conn = pymysql.connect(host = '127.0.0.1',
+                           user = 'root',
+                           password = '',
+                           db = 'finsta',
+                           charset = 'utf8mb4',
+                           )
+
 
 app.secret_key = "key"
 @app.route('/')
@@ -261,6 +269,25 @@ def tagRequest():
         conn.commit()
         cursor.close()
     return redirect(url_for('home'))
+  
+@app.route('/like', methods = ['GET' ,'POST'])
+def like():
+    user = session['username']
+    cursor = conn.cursor()
+    toLike = request.args.get('id')
+    rating = request.form['likeVal']
+    query = 'SELECT username, photoID FROM Likes where username = %s AND photoID = %s'
+    cursor.execute(query, (user, toLike))
+    data= cursor.fetchone()
+    if not data:
+        # flash('Liked!')
+        query = 'INSERT INTO likes(username, photoID, rating) VALUES(%s, %s, %s)'
+        cursor.execute(query, (user, toLike, rating))
+        conn.commit()
+    else:
+        flash("Photo already liked!")
+    cursor.close()
+    return redirect(url_for('home'))
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
@@ -297,3 +324,4 @@ def logout():
 
 if __name__ == "__main__":
     app.run
+
