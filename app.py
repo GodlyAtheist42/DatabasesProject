@@ -8,13 +8,21 @@ SALT = 'cs3083'
 
 app = Flask(__name__)
 
+# conn = pymysql.connect(host = '127.0.0.1',
+#                        user = 'root',
+#                        port = 8889,
+#                        password = 'root',
+#                        db = 'finsta',
+#                        charset = 'utf8mb4',
+#                        )
+
 conn = pymysql.connect(host = '127.0.0.1',
                        user = 'root',
-                       port = 8889,
-                       password = 'root',
+                       password = '',
                        db = 'finsta',
                        charset = 'utf8mb4',
                        )
+
 app.secret_key = "key"
 @app.route('/')
 def hello():
