@@ -11,7 +11,7 @@ app = Flask(__name__)
 # COMMENTS/NOTES
 # default time stamp for datetime vals
 
-dev = ' '
+dev = 'nc'
 
 if dev == "nc":
     conn = pymysql.connect(host='127.0.0.1',
@@ -276,6 +276,10 @@ def like():
     cursor = conn.cursor()
     toLike = request.args.get('id')
     rating = request.form['likeVal']
+    if int(rating) > 10:
+        flash("Invalid rating")
+        cursor.close()
+        return redirect(url_for('home'))
     query = 'SELECT username, photoID FROM Likes where username = %s AND photoID = %s'
     cursor.execute(query, (user, toLike))
     data= cursor.fetchone()
