@@ -11,7 +11,7 @@ app = Flask(__name__)
 # COMMENTS/NOTES
 # default time stamp for datetime vals
 
-dev = 'nc'
+dev = 'n'
 
 if dev == "nc":
     conn = pymysql.connect(host='127.0.0.1',
@@ -109,6 +109,7 @@ def home():
     query = 'SELECT filepath, caption, photoPoster, photoID \
              FROM photo \
              WHERE (allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
+             OR photoPoster = %s \
              OR \
              (      photoID in (SELECT PhotoId \
 				    FROM SharedWith \
@@ -117,12 +118,12 @@ def home():
 					                                      WHERE member_username = %s)\
 			))'
 
-    cursor.execute(query,(user, user))
+    cursor.execute(query,(user, user, user))
     data = cursor.fetchall()
     query = 'SELECT username_follower FROM follow WHERE username_followed = %s AND followStatus=0'
     cursor.execute(query,user)
     data2 = cursor.fetchall()
-    query = 'SELECT groupName FROM belongTo WHERE member_username = %s'
+    query = 'SELECT groupName, owner_username FROM belongTo WHERE member_username = %s'
     cursor.execute(query,user)
     data3 = cursor.fetchall()
     query = 'SELECT photoID from tagged WHERE username = %s AND tagStatus = 0'
@@ -153,6 +154,8 @@ def post():
     link = request.form['photoPath']
     caption = request.form['caption']
     groups = request.form['groupList']
+    groups2 = request.form['groupList2']
+    print(groups2)
     allFollowTrue = int(request.form['allFollow'])
     query = 'SELECT max(photoID) FROM photo'
     cursor.execute(query,)
@@ -167,14 +170,17 @@ def post():
     conn.commit()
 
     if not allFollowTrue:
-        groupList = groups.split(',')
-        for group in groupList:
-            query = 'SELECT owner_username FROM belongTo where member_username = %s AND groupName = %s'
-            cursor.execute(query, (username, group))
-            owner = cursor.fetchone()
-            query = 'INSERT INTO sharedwith VALUES(%s, %s, %s)'
-            cursor.execute(query, (owner, group, pid))
-            conn.commit()
+        if not groups:
+            flash("No groups selected!")
+        else:
+            groupList = groups.split(',')
+            for group in groupList:
+                query = 'SELECT owner_username FROM belongTo where member_username = %s AND groupName = %s'
+                cursor.execute(query, (username, group))
+                owner = cursor.fetchone()
+                query = 'INSERT INTO sharedwith VALUES(%s, %s, %s)'
+                cursor.execute(query, (owner, group, pid))
+                conn.commit()
     cursor.close()
 
 
@@ -214,9 +220,18 @@ def follow():
     followed = request.form['followed']
     follower = session['username']
     cursor = conn.cursor()
-    query = 'INSERT INTO follow (username_followed, username_follower, followstatus) VALUES (%s, %s, 0)'
-    cursor.execute(query, (followed, follower))
-    conn.commit()
+    query =  "SELECT * FROM person WHERE username = %s"
+    cursor.execute(query, (followed))
+    flag = cursor.fetchone()
+    if flag:
+        try:
+            query = 'INSERT INTO follow (username_followed, username_follower, followstatus) VALUES (%s, %s, 0)'
+            cursor.execute(query, (followed, follower))
+            conn.commit()
+        except:
+            flash("You already follow this person!")
+    else:
+        flash("This person doesn't exist!")
     cursor.close()
     return redirect(url_for('home'))
 
@@ -230,27 +245,34 @@ def tag():
         query = 'INSERT INTO tagged VALUES(%s, %s, 1)'
         cursor.execute(query, (toTag, pid))
         conn.commit()
+
     else:
-        query = 'SELECT photoID \
-             FROM photo \
-             WHERE photoID = %s AND ((allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
-             OR \
-             (      photoID in (SELECT PhotoId \
-				    FROM SharedWith \
-					WHERE (groupName,groupOwner ) IN (SELECT groupName,owner_username \
-                                                          FROM BelongTo \
-					                                      WHERE member_username = %s)\
-			)))'
-        cursor.execute(query, (pid, toTag, toTag))
-        data = cursor.fetchone()
-        if data:
-            query = 'INSERT INTO tagged VALUES(%s, %s, 0)'
-            cursor.execute(query, (toTag, pid))
-            conn.commit()
+        query = 'SELECT * FROM person WHERE username = %s'
+        cursor.execute(query, (toTag))
+        flag = cursor.fetchone()
+        if not flag:
+            flash("This person doesn't exist")
         else:
-            flash("The tagged person can't see the photo.")
-            return redirect(url_for('home'))
-        cursor.close()
+            query = 'SELECT photoID \
+                FROM photo \
+                WHERE photoID = %s AND ((allFollowers = 1 AND photoPoster in (SELECT username_followed FROM follow WHERE username_follower = %s AND followStatus = 1)) \
+                OR \
+                (      photoID in (SELECT PhotoId \
+                        FROM SharedWith \
+                        WHERE (groupName,groupOwner ) IN (SELECT groupName,owner_username \
+                                                            FROM BelongTo \
+                                                            WHERE member_username = %s)\
+                )))'
+            cursor.execute(query, (pid, toTag, toTag))
+            data = cursor.fetchone()
+            if data:
+                query = 'INSERT INTO tagged VALUES(%s, %s, 0)'
+                cursor.execute(query, (toTag, pid))
+                conn.commit()
+            else:
+                flash("The tagged person can't see the photo.")
+                return redirect(url_for('home'))
+            cursor.close()
 
     return redirect(url_for('home'))
 
@@ -276,8 +298,8 @@ def like():
     cursor = conn.cursor()
     toLike = request.args.get('id')
     rating = request.form['likeVal']
-    if int(rating) > 10:
-        flash("Invalid rating")
+    if int(rating) > 10 or int(rating) < 0:
+        flash("Invalid rating!")
         cursor.close()
         return redirect(url_for('home'))
     query = 'SELECT username, photoID FROM Likes where username = %s AND photoID = %s'

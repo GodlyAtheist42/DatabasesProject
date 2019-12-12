@@ -4,7 +4,7 @@
 <body>
     {% with message = get_flashed_messages() %}
     {% if message %}
-      {{ message[0] }}
+        <p style= "text-align:left; color:#FF0000";> {{ message[0] }} </p>
     {% endif %}
     {% endwith %}
 <form action="/post" method="POST">
@@ -21,7 +21,17 @@
   <input type="radio" name="allFollow" value="0" checked> <br>
 If no, enter a comma separated list of the groups you want to post it to:
   <input type="text" name = "groupList" placeholder="List of groups"/><br>
-	<input type="submit" value = Post />
+<!-- {% if groups %}
+{% for group in groups %}
+<input type="checkbox" name = "groupList2" value={{group}} /> {{ group[0] }} created by {{ group[1] }}<br>
+{% endfor %}
+<br>
+
+{% else %}
+You have none. What a loser.<br><br>
+{% endif %} -->
+
+<input type="submit" value = Post />
 </form>
 
 <form action="/createGroup" method="POST">
@@ -55,7 +65,7 @@ Groups you belong to: <br>
 <br>
 
 {% else %}
-You have none. What a loser<br><br>
+You have none. What a loser.<br><br>
 
 {% endif %}
 
@@ -83,7 +93,7 @@ Follow Requests:<br>
 {% endfor %}
 
 {% else %}
-No one likes you <br><br>
+No follow requests. No one likes you. <br><br>
 
 {%endif %}
 
