@@ -171,11 +171,16 @@ def post():
             groupList = groups.split(',')
             ownerList = owners.split(',')
             for i in range(len(groupList)):
-                query = 'INSERT INTO sharedwith VALUES(%s, %s, %s)'
-                cursor.execute(query, (ownerList[i], groupList[i], pid))
-                conn.commit()
-    cursor.close()
-
+                query = 'SELECT * FROM friendGroup WHERE groupOwner = %s AND groupName = %s'
+                cursor.execute(query, (ownerList[i], groupList[i]))
+                flag = cursor.fetchone()
+                if flag:
+                    query = 'INSERT INTO sharedwith VALUES(%s, %s, %s)'
+                    cursor.execute(query, (ownerList[i], groupList[i], pid))
+                    conn.commit()
+                else:
+                    flash("Group and owner don't match!")
+                    break
 
     cursor.close()
     return redirect(url_for('home'))
