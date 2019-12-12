@@ -154,8 +154,7 @@ def post():
     link = request.form['photoPath']
     caption = request.form['caption']
     groups = request.form['groupList']
-    groups2 = request.form['groupList2']
-    print(groups2)
+    owners = request.form['ownerList']
     allFollowTrue = int(request.form['allFollow'])
     query = 'SELECT max(photoID) FROM photo'
     cursor.execute(query,)
@@ -174,12 +173,10 @@ def post():
             flash("No groups selected!")
         else:
             groupList = groups.split(',')
-            for group in groupList:
-                query = 'SELECT owner_username FROM belongTo where member_username = %s AND groupName = %s'
-                cursor.execute(query, (username, group))
-                owner = cursor.fetchone()
+            ownerList = owners.split(',')
+            for i in range(len(groupList)):
                 query = 'INSERT INTO sharedwith VALUES(%s, %s, %s)'
-                cursor.execute(query, (owner, group, pid))
+                cursor.execute(query, (ownerList[i], groupList[i], pid))
                 conn.commit()
     cursor.close()
 
